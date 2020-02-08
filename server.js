@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = process.env.PORT;
+const PORT = 3007;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 let tables = [
@@ -14,8 +14,14 @@ let waitList = [
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'home.html')));
 app.get('/tables', (req, res) => res.sendFile(path.join(__dirname, 'tables.html')));
 app.get('/reserve', (req, res) => res.sendFile(path.join(__dirname, 'reserve.html')));
+
+
+
+
+
 app.get('/api/tables', (req, res) => res.json(tables));
 app.get('/api/waitlist', (req, res) => res.json(waitList));
+
 app.post('/api/tables', (req, res) => {
     const newReservation = req.body;
 
@@ -24,7 +30,6 @@ app.post('/api/tables', (req, res) => {
     } else {
         tables.push(newReservation);
     }
-    console.log(newReservation);
 
     res.json(newReservation);
 });
@@ -33,4 +38,13 @@ app.post('/api/clear', (req, res) => {
     waitList = [];
     res.json(tables);
 });
+
+app.delete('/api/tables/:tableid', (req, res) => {
+    const table = req.params.tableid;
+    delete tables[0];
+    tables = tables.slice(1);
+    return res.json(tables);
+});
+
+
 app.listen(PORT, () => console.log('App listening on PORT ' + PORT));

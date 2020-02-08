@@ -68,6 +68,7 @@
         <div class="container">
           <p>Control Panel</p>
           <p>
+            <button id="updateList">Update Table</button> |
             <a href="#" id="clear">Clear Table</a> |
             <a href="/api/tables">API Table Link</a> |
             <a href="/api/waitlist">API Wait List</a>
@@ -91,9 +92,10 @@
         console.log("------------------------------------");
 
         // Loop through and display each of the customers
+        var tableList = $("#tableList");
+        tableList.empty();
         for (var i = 0; i < tableData.length; i++) {
           // Get a reference to the tableList element and populate it with tables
-          var tableList = $("#tableList");
 
           // Then display the fields in the HTML (Section Name, Date, URL)
           var listItem = $("<li class='list-group-item mt-4'>");
@@ -152,7 +154,42 @@
       });
     }
 
+    function updateTable(e) {
+      $.ajax({ url: "/api/tables", method: "GET" }).then(tables => {
+        let index;
+        tables.forEach((table, i) => {
+          if (table || table !== null) {
+            return (index = i);
+          }
+        });
+        $.ajax({ url: "/api/tables/" + index, method: "DELETE" }).then(res => {
+          // next step is to GET waitlist
+          // take first item in waitlist array
+          // then POST to tables
+          // and update the html
+
+          const newres = res.slice(1); // this removes the null object at start of array
+
+          var tableList = $("#tableList");
+          tableList.empty(); // empties out the html
+          for (var i = 0; i < newres.length; i++) {
+            var listItem = $("<li class='list-group-item mt-4'>");
+            listItem.append(
+              $("<h2>").text("Table #" + (i + 1)),
+              $("<hr>"),
+              $("<h2>").text("ID: " + newres[i].customerID),
+              $("<h2>").text("Name: " + newres[i].customerName),
+              $("<h2>").text("Email: " + newres[i].customerEmail),
+              $("<h2>").text("Phone: " + newres[i].phoneNumber)
+            );
+            tableList.append(listItem);
+          }
+        });
+      });
+    }
+
     $("#clear").on("click", clearTable);
+    $("#updateList").on("click", updateTable);
 
     // Run Queries!
     // ==========================================
